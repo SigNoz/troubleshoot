@@ -1,1 +1,2 @@
-# troubleshoot
+# troubleshooting SigNoz
+
