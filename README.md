@@ -1,4 +1,4 @@
-# troubleshooting SigNoz
+# Troubleshooting SigNoz
 
 ## Build command
 ```
