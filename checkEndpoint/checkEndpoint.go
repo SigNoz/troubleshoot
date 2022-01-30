@@ -23,7 +23,7 @@ func newGRPCExporter(ctx context.Context, endpoint string, additionalOpts ...otl
 	client := otlptracegrpc.NewClient(opts...)
 	exp, err := otlptrace.New(ctx, client)
 	if err != nil {
-		zap.S().Fatalf("failed to create a new collector exporter: %v", err)
+		return nil
 	}
 	return exp
 }
@@ -32,7 +32,8 @@ var roSpans = tracetest.SpanStubs{{Name: "TestingSpan"}}.Snapshots()
 
 // Command returns checkEndpoint command
 func Command() *cobra.Command {
-	return &cobra.Command{
+	var endpoint string
+	cmd := &cobra.Command{
 		Use:   "checkEndpoint",
 		Short: "Checks endpoint of SigNoz",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -42,7 +43,7 @@ func Command() *cobra.Command {
 			exp := newGRPCExporter(
 
 				ctx,
-				"stagingapp.signoz.io:4317",
+				endpoint,
 				otlptracegrpc.WithTimeout(10*time.Second),
 				otlptracegrpc.WithRetry(otlptracegrpc.RetryConfig{Enabled: false}),
 			)
@@ -56,4 +57,7 @@ func Command() *cobra.Command {
 
 		},
 	}
+	cmd.Flags().StringVarP(&endpoint, "endpoint", "e", "", "URL to SigNoz with port")
+	cmd.MarkFlagRequired("endpoint")
+	return cmd
 }

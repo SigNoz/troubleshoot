@@ -40,7 +40,7 @@ func main() {
 
 	err := cli.Execute()
 	if err != nil {
-		zap.S().Error(err)
+		// zap.S().Error(err)
 		os.Exit(1)
 	} else {
 		zap.S().Info("Successfully sent sample data to signoz ...")
