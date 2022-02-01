@@ -34,8 +34,9 @@ var roSpans = tracetest.SpanStubs{{Name: "TestingSpan"}}.Snapshots()
 func Command() *cobra.Command {
 	var endpoint string
 	cmd := &cobra.Command{
-		Use:   "checkEndpoint",
-		Short: "Checks endpoint of SigNoz",
+		Use:     "checkEndpoint",
+		Short:   "Checks endpoint of SigNoz",
+		Example: "checkEndpoint -e localhost:4317",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			zap.S().Info("checking reachability of SigNoz endpoint")
 
@@ -50,14 +51,14 @@ func Command() *cobra.Command {
 
 			err := exp.ExportSpans(ctx, roSpans)
 			if err != nil {
-				return fmt.Errorf("Not able to send data to SigNoz endpoint ...\n%s", err)
+				return fmt.Errorf("not able to send data to SigNoz endpoint ...\n%s", err)
 			} else {
 				return nil
 			}
 
 		},
 	}
-	cmd.Flags().StringVarP(&endpoint, "endpoint", "e", "", "URL to SigNoz with port")
+	cmd.Flags().StringVarP(&endpoint, "endpoint", "e", "localhost:4317", "URL to SigNoz with port")
 	cmd.MarkFlagRequired("endpoint")
 	return cmd
 }
