@@ -58,7 +58,7 @@ func Command() *cobra.Command {
 
 		},
 	}
-	cmd.Flags().StringVarP(&endpoint, "endpoint", "e", "localhost:4317", "URL to SigNoz with port")
+	cmd.Flags().StringVarP(&endpoint, "endpoint", "e", "", "URL to SigNoz with port")
 	cmd.MarkFlagRequired("endpoint")
 	return cmd
 }
