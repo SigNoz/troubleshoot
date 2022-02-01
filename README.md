@@ -10,4 +10,4 @@ go build -o signoz-troubleshoot .
 ```
  ./signoz-troubleshoot checkEndpoint --endpoint=<endpoint-to-check>
  ```
- Eg. `./signoz-troubleshoot checkEndpoint --endpoint=http://localhost:4317
+ Eg. `./signoz-troubleshoot checkEndpoint --endpoint=localhost:4317
