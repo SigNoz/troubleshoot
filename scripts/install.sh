@@ -65,6 +65,9 @@ download_file() {
         curl -sfOL "$1"
     elif has_wget; then
         wget -qN "$1"
+    else
+        log_error "Neither curl nor wget could be found on the machine.\nPlease make sure you have either of them installed before running this script."
+        exit 1
     fi
     if [ $? -ne 0 ]; then
         log_error "Error while downloading asset.\nMake sure there are assets attached in the release of the remote repository."
