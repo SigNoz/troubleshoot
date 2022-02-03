@@ -1,5 +1,8 @@
 FROM golang:1.17-stretch AS builder
 
+# Create user
+RUN useradd -u 1001 signoz
+
 # Define docker arguments with default values
 ARG GOOS=linux
 ARG GOARCH=amd64
@@ -22,16 +25,20 @@ RUN go mod download -x
 
 # Add the sources and proceed with build
 ADD . .
-RUN go build -o /go/bin/troubleshoot
+RUN go build -o ${GOPATH}/bin/troubleshoot
 
-# use a scratch to run binary
+# Use a scratch to run binary
 FROM scratch
 
-# Add Maintainer Info
-LABEL maintainer="signoz"
+# Use signoz user from builder stage
+COPY --from=builder /etc/passwd /etc/passwd
+USER signoz
 
-# copy the binary from builder
-COPY --from=builder /go/bin/troubleshoot /
+# Add Maintainer Info
+LABEL maintainer="SigNoz <hello@signoz.io>"
+
+# copy the binary from builder stage
+COPY --from=builder /go/bin/troubleshoot .
 
 # run the binary
 ENTRYPOINT ["/troubleshoot"]
