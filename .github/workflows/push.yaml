@@ -1,0 +1,47 @@
+name: push images to DockerHub
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+
+jobs:
+
+  image-build-and-push:
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_REPOSITORY: troubleshoot
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+        with:
+          version: latest
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Get branch name
+        id: branch-name
+        uses: tj-actions/branch-names@v5.1
+
+      - name: Build and push docker image
+        run: |
+          if [ '${{ steps.branch-name.outputs.is_tag }}' == 'true' ]; then
+            DOCKER_TAG="${{ steps.branch-name.outputs.tag }}"
+          else
+            DOCKER_TAG="latest"
+          fi
+          docker buildx build --file Dockerfile --progress plane --no-cache --push \
+            --tag ${{ secrets.DOCKERHUB_USERNAME }}/${DOCKER_REPOSITORY}:${DOCKER_TAG} \
+            --platform linux/arm64,linux/amd64 .
