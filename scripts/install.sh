@@ -44,27 +44,85 @@ has_curl() {
 # Set kernel variable based on the OS kernel
 set_kernel() {
     uname_kernel="$(uname -s)"
-    KERNEL=$(echo "${uname_kernel,,}")
+    case "$uname_kernel" in
+        'Linux')
+            KERNEL="linux"
+            ;;
+        'Darwin')
+            KERNEL="darwin"
+            ;;
+        *)
+            log_error "kernel not supported: $uname_kernel"
+            exit 1
+            ;;
+    esac
 }
 
 # Set chip variable based on machine hardware
 set_chip() {
-    uname_hardware="$(uname -m)"
-    CHIP=$(echo "${uname_hardware,,}")
+    uname_machine="$(uname -m)"
+    case "$uname_machine" in
+        'x86_64')
+            CHIP="amd64"
+            ;;
+        'amd64')
+            CHIP="amd64"
+            ;;
+        'arm64')
+            CHIP="arm64"
+            ;;
+        *)
+            log_error "machine chip not supported: $uname_machine"
+            exit 1
+            ;;
+    esac
+}
+
+# Fetch the latest release
+set_latest_version() {
+    # Get latest release from GitHub api
+    release_latest=$(get_text "https://api.github.com/repos/${OWNER}/${REPOSITORY}/releases/latest")
+    LATEST_VERSION=$(echo "$release_latest" |
+        grep '"tag_name":' |
+        sed -E 's/.*"([^"]+)".*/\1/')
+    if [ "$?" -ne 0 ]; then
+        log_error "Neither curl nor wget could be found on the machine.\nPlease make sure you have either of them installed before running this script."
+        exit 1
+    fi
 }
 
 # Set asset name and URL
 set_asset() {
-    ASSET_NAME="${BINARY_NAME}-${LATEST_VERSION}-linux-amd64.tar.gz"
+    ASSET_NAME="${BINARY_NAME}-${LATEST_VERSION}-${KERNEL}-${CHIP}.tar.gz"
     ASSET_URL="https://github.com/${OWNER}/${REPOSITORY}/releases/download/${LATEST_VERSION}/${ASSET_NAME}"
+}
+
+# Fetch text file from the URL passed
+get_text() {
+    curl_flags="-sfL"
+    wget_flags="-qNO-"
+    if has_curl; then
+        curl "$curl_flags" "$1"
+    elif has_wget; then
+        wget "$wget_flags" "$1"
+    else
+        log_error "Neither curl nor wget could be found on the machine.\nPlease make sure you have either of them installed before running this script."
+        exit 1
+    fi
+    if [ $? -ne 0 ]; then
+        log_error "Error while downloading asset.\nMake sure there are assets attached in the release of the remote repository."
+        exit 1
+    fi
 }
 
 # Download file from the URL passed
 download_file() {
+    curl_flags="-sfLO"
+    wget_flags="-qN"
     if has_curl; then
-        curl -sfOL "$1"
+        curl "$curl_flags" "$1"
     elif has_wget; then
-        wget -qN "$1"
+        wget "$wget_flags" "$1"
     else
         log_error "Neither curl nor wget could be found on the machine.\nPlease make sure you have either of them installed before running this script."
         exit 1
@@ -96,14 +154,10 @@ check_md5() {
 # Run bye if any interrupt or failure happens
 trap bye 1 2 3 6
 
-LATEST_VERSION="$(git describe --abbrev=0 --tags 2> /dev/null)"
-if [ $? -ne 0 ]; then
-    log_error "Error while fetching latest version tag.\nMake sure there are tags. For example: v0.0.1"
-    exit 0
-fi
 
 set_kernel
 set_chip
+set_latest_version
 set_asset
 
 fetch_troubleshoot
