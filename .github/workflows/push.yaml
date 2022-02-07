@@ -12,6 +12,7 @@ jobs:
   image-build-and-push:
     runs-on: ubuntu-latest
     env:
+      DOCKER_OWNER: signoz
       DOCKER_REPOSITORY: troubleshoot
     steps:
       - name: Checkout code
@@ -43,5 +44,5 @@ jobs:
             DOCKER_TAG="latest"
           fi
           docker buildx build --file Dockerfile --progress plane --no-cache --push \
-            --tag ${{ secrets.DOCKERHUB_USERNAME }}/${DOCKER_REPOSITORY}:${DOCKER_TAG} \
+            --tag ${DOCKER_OWNER}/${DOCKER_REPOSITORY}:${DOCKER_TAG} \
             --platform linux/arm64,linux/amd64 .
