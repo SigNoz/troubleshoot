@@ -1,6 +1,6 @@
 #!/bin/bash
 
-OWNER=signoz
+OWNER=SigNoz
 REPOSITORY=troubleshoot
 BINARY_NAME=troubleshoot
 
