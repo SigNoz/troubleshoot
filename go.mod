@@ -8,5 +8,5 @@ require (
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.3.0
 	go.opentelemetry.io/otel/sdk v1.3.0
 	go.uber.org/zap v1.20.0
-	google.golang.org/grpc v1.44.0 // indirect
+	google.golang.org/grpc v1.56.3 // indirect
 )
